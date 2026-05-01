@@ -1,0 +1,23 @@
+{
+  "name": "slack-top-8",
+  "version": "1.0.0",
+  "description": "MySpace-style Top 8 friends for Slack",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsup src/index.ts --format cjs --dts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.21.1",
+    "better-sqlite3": "^11.5.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.11",
+    "@types/node": "^22.0.0",
+    "tsup": "^8.2.4",
+    "tsx": "^4.17.0",
+    "typescript": "^5.5.4"
+  }
+}
