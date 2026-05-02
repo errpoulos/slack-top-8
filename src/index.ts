@@ -46,6 +46,10 @@ registerCommands(app);
 (async () => {
   const botClient = new WebClient(process.env.SLACK_BOT_TOKEN);
   startOAuthServer(botClient);
-  await app.start();
-  console.log('⚡ Slack Top 8 app is running');
+  try {
+    await app.start();
+    console.log('⚡ Slack Top 8 app is running');
+  } catch (err) {
+    console.error('[bolt] Failed to start (token may be inactive). Visit http://localhost:3000/install to get a new bot token.');
+  }
 })();
