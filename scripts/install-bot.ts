@@ -1,17 +1,25 @@
 import 'dotenv/config';
 import http from 'http';
+import crypto from 'crypto';
 
 const CLIENT_ID = process.env.SLACK_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET ?? '';
 const PORT = 3000;
 const REDIRECT_URI = `http://localhost:${PORT}/bot-callback`;
 
+let codeVerifier = '';
+
 const server = http.createServer(async (req, res) => {
   if (req.url === '/install') {
+    codeVerifier = crypto.randomBytes(32).toString('base64url');
+    const codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64url');
+
     const params = new URLSearchParams({
       client_id: CLIENT_ID,
       scope: 'commands,users:read,chat:write,users.profile:read',
       redirect_uri: REDIRECT_URI,
+      code_challenge: codeChallenge,
+      code_challenge_method: 'S256',
     });
     res.writeHead(302, { Location: `https://slack.com/oauth/v2/authorize?${params}` });
     res.end();
@@ -32,6 +40,7 @@ const server = http.createServer(async (req, res) => {
       client_secret: CLIENT_SECRET,
       code,
       redirect_uri: REDIRECT_URI,
+      code_verifier: codeVerifier,
     });
 
     const response = await fetch('https://slack.com/api/oauth.v2.access', {
