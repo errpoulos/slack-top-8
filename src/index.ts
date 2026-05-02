@@ -44,8 +44,8 @@ app.action('connect_profile', async ({ ack }) => { await ack(); });
 registerCommands(app);
 
 (async () => {
-  await app.start();
   const botClient = new WebClient(process.env.SLACK_BOT_TOKEN);
   startOAuthServer(botClient);
+  await app.start();
   console.log('⚡ Slack Top 8 app is running');
 })();
