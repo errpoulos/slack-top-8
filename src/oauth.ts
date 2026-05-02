@@ -48,12 +48,13 @@ export function startOAuthServer(botClient: WebClient): http.Server {
         code,
         redirect_uri: redirectUri,
         code_verifier: codeVerifier,
-      })) as { authed_user?: { access_token?: string } };
+      })) as { authed_user?: { access_token?: string; refresh_token?: string } };
 
       const userToken = result.authed_user?.access_token;
       if (!userToken) throw new Error('No user token in OAuth response');
+      const refreshToken = result.authed_user?.refresh_token ?? null;
 
-      setUserToken(userId, userToken);
+      setUserToken(userId, userToken, refreshToken);
 
       // Sync profile and refresh home concurrently
       await Promise.all([
