@@ -1,8 +1,10 @@
 import 'dotenv/config';
 import { App } from '@slack/bolt';
+import { WebClient } from '@slack/web-api';
 import { buildHomeView } from './home';
 import { buildEditModal, handleEditModalSubmit, EDIT_MODAL_CALLBACK } from './modals';
 import { registerCommands } from './commands';
+import { startOAuthServer } from './oauth';
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -36,9 +38,14 @@ app.view(EDIT_MODAL_CALLBACK, async ({ ack, body, view, client }) => {
   }
 });
 
+// Link buttons send an action event that must be acked even though the URL opens automatically
+app.action('connect_profile', async ({ ack }) => { await ack(); });
+
 registerCommands(app);
 
 (async () => {
   await app.start();
+  const botClient = new WebClient(process.env.SLACK_BOT_TOKEN);
+  startOAuthServer(botClient);
   console.log('⚡ Slack Top 8 app is running');
 })();

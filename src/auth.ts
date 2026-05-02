@@ -1,11 +1,19 @@
 import crypto from 'crypto';
 
-// Short-lived nonce store: nonce -> userId
-const pending = new Map<string, string>();
+interface PendingAuth {
+  userId: string;
+  codeVerifier: string;
+}
+
+// Short-lived store: nonce -> { userId, codeVerifier }
+const pending = new Map<string, PendingAuth>();
 
 export function generateAuthUrl(userId: string): string {
   const nonce = crypto.randomBytes(16).toString('hex');
-  pending.set(nonce, userId);
+  const codeVerifier = crypto.randomBytes(32).toString('base64url');
+  const codeChallenge = crypto.createHash('sha256').update(codeVerifier).digest('base64url');
+
+  pending.set(nonce, { userId, codeVerifier });
   setTimeout(() => pending.delete(nonce), 10 * 60 * 1000);
 
   const redirectUri = process.env.OAUTH_REDIRECT_URI ?? 'http://localhost:3000/oauth/callback';
@@ -14,13 +22,15 @@ export function generateAuthUrl(userId: string): string {
     user_scope: 'users.profile:write',
     redirect_uri: redirectUri,
     state: nonce,
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
   });
 
   return `https://slack.com/oauth/v2/authorize?${params}`;
 }
 
-export function consumeNonce(nonce: string): string | undefined {
-  const userId = pending.get(nonce);
+export function consumeNonce(nonce: string): PendingAuth | undefined {
+  const entry = pending.get(nonce);
   pending.delete(nonce);
-  return userId;
+  return entry;
 }
