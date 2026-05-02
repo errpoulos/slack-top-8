@@ -5,7 +5,7 @@ import crypto from 'crypto';
 const CLIENT_ID = process.env.SLACK_CLIENT_ID ?? '';
 const CLIENT_SECRET = process.env.SLACK_CLIENT_SECRET ?? '';
 const PORT = 3000;
-const REDIRECT_URI = `http://localhost:${PORT}/bot-callback`;
+const REDIRECT_URI = process.env.INSTALL_REDIRECT_URI ?? `http://localhost:${PORT}/bot-callback`;
 
 let codeVerifier = '';
 
