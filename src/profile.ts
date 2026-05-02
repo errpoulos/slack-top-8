@@ -11,18 +11,23 @@ async function resolveFieldId(botClient: WebClient): Promise<string | null> {
     const res = await (botClient.team.profile as {
       get: () => Promise<{ profile?: { fields?: { id?: string; label?: string }[] } }>;
     }).get();
-    const field = res.profile?.fields?.find((f) => f.label === 'Top 8');
+    const fields = res.profile?.fields ?? [];
+    const label = (process.env.TOP8_PROFILE_FIELD_LABEL ?? 'top 8').toLowerCase();
+    const field = fields.find((f) => f.label?.toLowerCase() === label);
+    if (!field) {
+      console.warn(
+        `[top8] No profile field matched "${label}". Found: ${fields.map((f) => f.label).join(', ') || '(none)'}. ` +
+          'Set TOP8_PROFILE_FIELD_LABEL in .env to the exact field name, or set TOP8_PROFILE_FIELD_ID.'
+      );
+    }
     cachedFieldId = field?.id ?? null;
-  } catch {
+  } catch (err) {
+    console.warn('[top8] team.profile.get failed:', err);
     cachedFieldId = null;
   }
 
   if (!cachedFieldId) {
-    console.warn(
-      '[top8] "Top 8" profile field not found. ' +
-        'Create it in workspace Settings → Profile & Account → Edit Profile Fields, ' +
-        'then optionally set TOP8_PROFILE_FIELD_ID in .env to skip this lookup.'
-    );
+    console.warn('[top8] Profile field ID could not be resolved — profile sync disabled.');
   }
 
   return cachedFieldId;

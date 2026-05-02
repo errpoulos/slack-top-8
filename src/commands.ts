@@ -1,13 +1,13 @@
 import type { App } from '@slack/bolt';
 import { getTop8 } from './db';
 
-function formatTop8(ownerMention: string, friendIds: string[]): string {
-  const lines: string[] = [`*${ownerMention}'s Top 8:*`];
-  for (let i = 0; i < 8; i++) {
-    const friend = friendIds[i] ? `<@${friendIds[i]}>` : '—';
-    lines.push(`${i + 1}. ${friend}`);
-  }
-  return lines.join('\n');
+function formatTop8(header: string, friendIds: string[]): string {
+  const slots = Array.from({ length: 8 }, (_, i) =>
+    friendIds[i] ? `${i + 1}. <@${friendIds[i]}>` : `${i + 1}. —`
+  );
+  // Two columns: odd positions left, even positions right
+  const rows = Array.from({ length: 4 }, (_, i) => `${slots[i * 2]}   ${slots[i * 2 + 1]}`);
+  return `${header}\n${rows.join('\n')}`;
 }
 
 export function registerCommands(app: App): void {
@@ -17,20 +17,19 @@ export function registerCommands(app: App): void {
     const arg = command.text.trim();
 
     let targetId: string;
-    let ownerMention: string;
+    let header: string;
 
     if (arg) {
-      // Strip <@USERID> or <@USERID|name> mention format
       const match = arg.match(/^<@([A-Z0-9]+)(?:\|[^>]*)?>$/);
       if (!match) {
         await respond({ text: 'Usage: `/top8` or `/top8 @someone`', response_type: 'ephemeral' });
         return;
       }
       targetId = match[1];
-      ownerMention = `<@${targetId}>`;
+      header = `*<@${targetId}>'s Top 8:*`;
     } else {
       targetId = command.user_id;
-      ownerMention = 'Your';
+      header = '*Your Top 8:*';
     }
 
     const entries = getTop8(targetId);
@@ -43,6 +42,6 @@ export function registerCommands(app: App): void {
       return;
     }
 
-    await respond({ text: formatTop8(ownerMention, friendIds), response_type: 'ephemeral' });
+    await respond({ text: formatTop8(header, friendIds), response_type: 'ephemeral' });
   });
 }
