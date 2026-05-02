@@ -7,7 +7,8 @@
     "dev": "tsx watch src/index.ts",
     "build": "tsup src/index.ts --format cjs --dts",
     "start": "node dist/index.js",
-    "debug:fields": "tsx scripts/debug-fields.ts"
+    "debug:fields": "tsx scripts/debug-fields.ts",
+    "install-bot": "tsx scripts/install-bot.ts"
   },
   "dependencies": {
     "@slack/bolt": "^3.21.1",
