@@ -1,12 +1,11 @@
 import type { App } from '@slack/bolt';
 import { getTop8 } from './db';
-import { buildEditModal, EDIT_MODAL_CALLBACK } from './modals';
+import { buildEditModal } from './modals';
 
 function formatTop8(header: string, friendIds: string[]): string {
   const slots = Array.from({ length: 8 }, (_, i) =>
     friendIds[i] ? `${i + 1}. <@${friendIds[i]}>` : `${i + 1}. —`
   );
-  // Two columns: odd positions left, even positions right
   const rows = Array.from({ length: 4 }, (_, i) => `${slots[i * 2]}   ${slots[i * 2 + 1]}`);
   return `${header}\n${rows.join('\n')}`;
 }
@@ -32,7 +31,7 @@ export function registerCommands(app: App): void {
       header = '*Your Top 8:*';
     }
 
-    const entries = getTop8(targetId);
+    const entries = getTop8(command.team_id, targetId);
     const friendIds = entries.map((e) => e.friend_id);
 
     if (friendIds.length === 0 && targetId !== command.user_id) {
@@ -49,7 +48,7 @@ export function registerCommands(app: App): void {
     await ack();
     await client.views.open({
       trigger_id: command.trigger_id,
-      view: buildEditModal(command.user_id),
+      view: buildEditModal(command.team_id, command.user_id),
     });
   });
 }

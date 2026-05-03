@@ -18,8 +18,8 @@ async function resolveFriends(client: WebClient, friendIds: string[]): Promise<F
   return results;
 }
 
-export async function buildHomeView(client: WebClient, userId: string): Promise<HomeView> {
-  const entries = getTop8(userId);
+export async function buildHomeView(client: WebClient, teamId: string, userId: string): Promise<HomeView> {
+  const entries = getTop8(teamId, userId);
   const friendMap = new Map<number, FriendInfo>();
 
   if (entries.length > 0) {

@@ -5,8 +5,8 @@ import { buildHomeView } from './home';
 
 export const EDIT_MODAL_CALLBACK = 'edit_top8_modal';
 
-export function buildEditModal(userId: string): ModalView {
-  const entries = getTop8(userId);
+export function buildEditModal(teamId: string, userId: string): ModalView {
+  const entries = getTop8(teamId, userId);
   const currentFriends = new Map(entries.map((e) => [e.position, e.friend_id]));
 
   const inputs = Array.from({ length: 8 }, (_, i) => {
@@ -37,6 +37,7 @@ export function buildEditModal(userId: string): ModalView {
 }
 
 export async function handleEditModalSubmit(
+  teamId: string,
   userId: string,
   values: Record<string, Record<string, { selected_user?: string | null }>>,
   client: WebClient
@@ -53,9 +54,9 @@ export async function handleEditModalSubmit(
     }
   }
 
-  setTop8(userId, friendIds);
+  setTop8(teamId, userId, friendIds);
 
-  const view = await buildHomeView(client, userId);
+  const view = await buildHomeView(client, teamId, userId);
   await client.views.publish({ user_id: userId, view });
 
   return null;
