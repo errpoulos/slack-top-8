@@ -1,5 +1,6 @@
 import type { App } from '@slack/bolt';
 import { getTop8 } from './db';
+import { buildEditModal, EDIT_MODAL_CALLBACK } from './modals';
 
 function formatTop8(header: string, friendIds: string[]): string {
   const slots = Array.from({ length: 8 }, (_, i) =>
@@ -11,7 +12,7 @@ function formatTop8(header: string, friendIds: string[]): string {
 }
 
 export function registerCommands(app: App): void {
-  app.command('/top8', async ({ command, ack, respond, client }) => {
+  app.command('/showtop8', async ({ command, ack, respond, client }) => {
     await ack();
 
     const arg = command.text.trim();
@@ -22,7 +23,7 @@ export function registerCommands(app: App): void {
     if (arg) {
       const match = arg.match(/^<@([A-Z0-9]+)(?:\|[^>]*)?>$/);
       if (!match) {
-        await respond({ text: 'Usage: `/top8` or `/top8 @someone`', response_type: 'ephemeral' });
+        await respond({ text: 'Usage: `/showtop8` or `/showtop8 @someone`', response_type: 'ephemeral' });
         return;
       }
       targetId = match[1];
@@ -43,5 +44,13 @@ export function registerCommands(app: App): void {
     }
 
     await respond({ text: formatTop8(header, friendIds), response_type: 'ephemeral' });
+  });
+
+  app.command('/settop8', async ({ command, ack, client }) => {
+    await ack();
+    await client.views.open({
+      trigger_id: command.trigger_id,
+      view: buildEditModal(command.user_id),
+    });
   });
 }
