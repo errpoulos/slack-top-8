@@ -40,6 +40,7 @@ const stmtGetTokenRow = db.prepare<[string], { access_token: string; refresh_tok
 const stmtSetToken = db.prepare<[string, string, string | null]>(
   'INSERT OR REPLACE INTO user_tokens (user_id, access_token, refresh_token) VALUES (?, ?, ?)'
 );
+const stmtDeleteToken = db.prepare<[string]>('DELETE FROM user_tokens WHERE user_id = ?');
 
 export function getTop8(userId: string): Top8Entry[] {
   return stmtGet.all(userId);
@@ -57,6 +58,10 @@ export function getUserToken(userId: string): string | null {
 
 export function setUserToken(userId: string, accessToken: string, refreshToken: string | null): void {
   stmtSetToken.run(userId, accessToken, refreshToken);
+}
+
+export function deleteUserToken(userId: string): void {
+  stmtDeleteToken.run(userId);
 }
 
 export const setTop8 = db.transaction((userId: string, friendIds: string[]) => {

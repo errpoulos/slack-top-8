@@ -1,5 +1,5 @@
 import { WebClient } from '@slack/web-api';
-import { getTop8, getUserTokenRow, setUserToken } from './db';
+import { getTop8, getUserTokenRow, setUserToken, deleteUserToken } from './db';
 
 let cachedFieldId: string | null | undefined;
 
@@ -99,6 +99,10 @@ export async function maybeSyncProfileField(userId: string, botClient: WebClient
     const newToken = await refreshAccessToken(userId, tokenRow.refreshToken, botClient);
     if (newToken) {
       error = await trySet(newToken);
+    } else {
+      deleteUserToken(userId);
+      console.warn(`[top8] Cleared invalid token for ${userId} — user must reconnect via App Home.`);
+      return;
     }
   }
 
