@@ -1,7 +1,6 @@
 import type { WebClient } from '@slack/web-api';
 import type { HomeView } from '@slack/bolt';
-import { getTop8, getUserToken } from './db';
-import { generateAuthUrl } from './auth';
+import { getTop8 } from './db';
 import type { FriendInfo } from './types';
 
 const ORDINALS = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th'];
@@ -77,27 +76,6 @@ export async function buildHomeView(client: WebClient, userId: string): Promise<
           },
         ],
       },
-      { type: 'divider' },
-      getUserToken(userId)
-        ? {
-            type: 'context' as const,
-            elements: [
-              { type: 'mrkdwn' as const, text: '✅ *Profile connected* — your Top 8 is visible on your Slack profile' },
-            ],
-          }
-        : {
-            type: 'section' as const,
-            text: {
-              type: 'mrkdwn' as const,
-              text: '*Show your Top 8 on your profile*\nLet others see your list when they visit your profile.',
-            },
-            accessory: {
-              type: 'button' as const,
-              action_id: 'connect_profile',
-              text: { type: 'plain_text' as const, text: '🔗 Connect profile' },
-              url: generateAuthUrl(userId),
-            },
-          },
     ],
   };
 }

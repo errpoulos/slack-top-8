@@ -2,7 +2,6 @@ import type { ModalView } from '@slack/bolt';
 import type { WebClient } from '@slack/web-api';
 import { getTop8, setTop8 } from './db';
 import { buildHomeView } from './home';
-import { maybeSyncProfileField } from './profile';
 
 export const EDIT_MODAL_CALLBACK = 'edit_top8_modal';
 
@@ -56,10 +55,7 @@ export async function handleEditModalSubmit(
 
   setTop8(userId, friendIds);
 
-  const [view] = await Promise.all([
-    buildHomeView(client, userId),
-    maybeSyncProfileField(userId, client),
-  ]);
+  const view = await buildHomeView(client, userId);
   await client.views.publish({ user_id: userId, view });
 
   return null;

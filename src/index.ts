@@ -38,8 +38,6 @@ app.view(EDIT_MODAL_CALLBACK, async ({ ack, body, view, client }) => {
   }
 });
 
-// Link buttons send an action event that must be acked even though the URL opens automatically
-app.action('connect_profile', async ({ ack }) => { await ack(); });
 
 registerCommands(app);
 
