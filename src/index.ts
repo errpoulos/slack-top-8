@@ -1,16 +1,12 @@
 import 'dotenv/config';
 import { App } from '@slack/bolt';
-import { WebClient } from '@slack/web-api';
 import { buildHomeView } from './home';
 import { buildEditModal, handleEditModalSubmit, EDIT_MODAL_CALLBACK } from './modals';
 import { registerCommands } from './commands';
-import { startOAuthServer } from './oauth';
 
 const app = new App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
-  socketMode: true,
-  appToken: process.env.SLACK_APP_TOKEN,
 });
 
 app.event('app_home_opened', async ({ event, client }) => {
@@ -38,16 +34,9 @@ app.view(EDIT_MODAL_CALLBACK, async ({ ack, body, view, client }) => {
   }
 });
 
-
 registerCommands(app);
 
 (async () => {
-  const botClient = new WebClient(process.env.SLACK_BOT_TOKEN);
-  startOAuthServer(botClient);
-  try {
-    await app.start();
-    console.log('⚡ Slack Top 8 app is running');
-  } catch (err) {
-    console.error('[bolt] Failed to start (token may be inactive). Visit http://localhost:3000/install to get a new bot token.');
-  }
+  await app.start(process.env.PORT ?? 3000);
+  console.log('⚡ Slack Top 8 app is running');
 })();
