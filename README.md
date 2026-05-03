@@ -1,93 +1,42 @@
 # Slack Top 8
 
-A Slack app that brings back the MySpace Top 8 — let workspace members publicly list their 8 favourite colleagues.
+Remember MySpace Top 8? This Slack app brings it back.
 
-## Features
+Add up to 8 favourite colleagues to your list. Anyone in your workspace can look up anyone else's Top 8 — great for finding out who has who in their corner.
 
-- **App Home tab** — view your Top 8 with profile pictures and edit it via a modal
-- **`/top8` slash command** — quickly view your own or anyone else's list
-- **Public lists** — anyone in the workspace can look up anyone's Top 8
+---
 
-## Prerequisites
+## How it works
 
-- Node.js 18+
-- A Slack workspace where you can install apps
+### App Home
+Open the app and your Top 8 is front and centre, complete with profile pictures. Hit **Edit Your Top 8** to pick your people.
 
-## Slack App Setup
+![App Home showing a user's Top 8 with avatars](https://via.placeholder.com/600x300?text=App+Home+screenshot)
 
-1. Go to [api.slack.com/apps](https://api.slack.com/apps) and click **Create New App → From scratch**.
+### Slash commands
 
-2. Under **Socket Mode**, enable it. This generates your `SLACK_APP_TOKEN` (`xapp-...`). Give the token the `connections:write` scope.
+| Command | What it does |
+|---|---|
+| `/settop8` | Opens the edit modal to update your list |
+| `/showtop8 @someone` | Shows that person's Top 8, just for you |
 
-3. Under **OAuth & Permissions → Bot Token Scopes**, add:
-   - `commands`
-   - `users:read`
-   - `chat:write`
+---
 
-4. Under **Event Subscriptions**, enable events and subscribe to the bot event:
-   - `app_home_opened`
+## Built with
 
-5. Under **Slash Commands**, create:
-   - Command: `/top8`
-   - Description: `View yours or someone else's Top 8`
-   - Usage hint: `[@username]`
+- [Slack Bolt for JavaScript](https://slack.dev/bolt-js/) — event handling and modals
+- [Socket Mode](https://api.slack.com/apis/connections/socket) — no public URL required
+- [better-sqlite3](https://github.com/WiseLibs/better-sqlite3) — lightweight local persistence
+- TypeScript
 
-6. Under **App Home**, enable the **Home Tab**.
-
-7. Install the app to your workspace. Copy the **Bot User OAuth Token** (`xoxb-...`) from **OAuth & Permissions** and the **Signing Secret** from **Basic Information**.
-
-## Installation
-
-```bash
-git clone <repo-url>
-cd slack-top-8
-npm install
-cp .env.example .env
-```
-
-Edit `.env` with your credentials:
-
-```env
-SLACK_BOT_TOKEN=xoxb-...
-SLACK_SIGNING_SECRET=...
-SLACK_APP_TOKEN=xapp-...
-DATABASE_PATH=./top8.db   # optional, defaults to ./top8.db
-```
-
-## Running
-
-```bash
-# Development (hot-reload)
-npm run dev
-
-# Production
-npm run build
-npm start
-```
-
-On first run, `top8.db` is created automatically — no migration step needed.
-
-## Usage
-
-### App Home tab
-
-Open the app's DM in Slack and click the **Home** tab. Your current Top 8 is displayed. Click **Edit Your Top 8** to open a modal where you can pick up to 8 colleagues (one per slot, ordered by preference).
-
-### Slash command
-
-| Command | Result |
-|---------|--------|
-| `/top8` | Your own Top 8 (visible only to you) |
-| `/top8 @alice` | Alice's Top 8 (visible only to you) |
-
-## Project Structure
+## Stack
 
 ```
 src/
-  index.ts      # App entry point, Bolt handler registration
-  db.ts         # SQLite schema and CRUD helpers
+  index.ts      # Bolt app init and handler registration
+  db.ts         # SQLite schema and CRUD
   home.ts       # App Home Block Kit view
-  modals.ts     # Edit modal view and submission handler
-  commands.ts   # /top8 slash command
-  types.ts      # Shared TypeScript types
+  modals.ts     # Edit modal and submission handler
+  commands.ts   # /settop8 and /showtop8 slash commands
+  types.ts      # Shared types
 ```
