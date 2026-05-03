@@ -16,34 +16,25 @@ export function registerCommands(app: App): void {
     await ack();
 
     const arg = command.text.trim();
+    const match = arg.match(/^<@([A-Z0-9]+)(?:\|[^>]*)?>$/);
 
-    let targetId: string;
-    let header: string;
-
-    if (arg) {
-      const match = arg.match(/^<@([A-Z0-9]+)(?:\|[^>]*)?>$/);
-      if (!match) {
-        await respond({ text: 'Usage: `/showtop8` or `/showtop8 @someone`', response_type: 'ephemeral' });
-        return;
-      }
-      targetId = match[1];
-      header = `*<@${targetId}>'s Top 8:*`;
-    } else {
-      targetId = command.user_id;
-      header = '*Your Top 8:*';
+    if (!match) {
+      await respond({ text: 'Usage: `/showtop8 @someone`', response_type: 'ephemeral' });
+      return;
     }
 
+    const targetId = match[1];
     const entries = getTop8(targetId);
     const friendIds = entries.map((e) => e.friend_id);
 
-    if (friendIds.length === 0 && targetId !== command.user_id) {
+    if (friendIds.length === 0) {
       const res = await client.users.info({ user: targetId });
       const name = res.user?.profile?.display_name || res.user?.real_name || targetId;
       await respond({ text: `*${name}* hasn't set up their Top 8 yet.`, response_type: 'ephemeral' });
       return;
     }
 
-    await respond({ text: formatTop8(header, friendIds), response_type: 'ephemeral' });
+    await respond({ text: formatTop8(`*<@${targetId}>'s Top 8:*`, friendIds), response_type: 'ephemeral' });
   });
 
   app.command('/settop8', async ({ command, ack, client }) => {
